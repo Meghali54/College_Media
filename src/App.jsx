@@ -1,8 +1,14 @@
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
 import React, { useState, useEffect } from "react";
 
 const App = () => {
   const [likedPosts, setLikedPosts] = useState({});
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("Home");
 
   // Mock data
   const stories = [
@@ -56,6 +62,15 @@ const App = () => {
     { username: "friend_three", avatar: "https://placehold.co/30x30/FFB3BA/FFFFFF?text=F3" },
   ];
 
+  const menuItems = [
+    { icon: "🏠", label: "Home", active: activeTab === "Home" },
+    { icon: "🔍", label: "Explore", active: activeTab === "Explore" },
+    { icon: "🎬", label: "Reels", active: activeTab === "Reels" },
+    { icon: "💬", label: "Messages", active: activeTab === "Messages" },
+    { icon: "🔔", label: "Notifications", active: activeTab === "Notifications" },
+    { icon: "⚙️", label: "Settings", active: activeTab === "Settings" },
+  ];
+
   // Auto-scroll stories
   useEffect(() => {
     const interval = setInterval(() => {
@@ -71,6 +86,10 @@ const App = () => {
     }));
   };
 
+  const handleTabClick = (tabLabel) => {
+    setActiveTab(tabLabel);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-orange-50">
       {/* Navigation Bar */}
@@ -79,7 +98,7 @@ const App = () => {
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-24 h-8 bg-gradient-to-r from-pink-500 via-purple-500 to-orange-400 rounded-lg flex items-center justify-center">
+                <div className="w-24 h-8 bg-gradient-to-r from-pink-500 via-purple-500 to-orange-400 rounded-lg flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity duration-300">
                   <span className="text-white font-bold text-xl">InstaClone</span>
                 </div>
               </div>
@@ -90,7 +109,9 @@ const App = () => {
                 <input
                   type="text"
                   placeholder="Search"
-                  className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-300 transition-all duration-300"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-300 focus:bg-white transition-all duration-300"
                 />
                 <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -115,18 +136,14 @@ const App = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-sm p-4 sticky top-24">
               <div className="space-y-4">
-                {[
-                  { icon: "🏠", label: "Home", active: true },
-                  { icon: "🔍", label: "Explore" },
-                  { icon: "🎬", label: "Reels" },
-                  { icon: "💬", label: "Messages" },
-                  { icon: "🔔", label: "Notifications" },
-                  { icon: "⚙️", label: "Settings" },
-                ].map((item, index) => (
+                {menuItems.map((item, index) => (
                   <button
                     key={index}
+                    onClick={() => handleTabClick(item.label)}
                     className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-gray-50 ${
-                      item.active ? "bg-gradient-to-r from-pink-100 to-purple-100 text-purple-700" : "text-gray-600"
+                      item.active 
+                        ? "bg-gradient-to-r from-pink-100 to-purple-100 text-purple-700 shadow-sm" 
+                        : "text-gray-600"
                     }`}
                   >
                     <span className="text-xl">{item.icon}</span>
@@ -141,13 +158,17 @@ const App = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Stories Carousel */}
             <div className="bg-white rounded-2xl shadow-sm p-4">
-              <div className="flex space-x-4 overflow-x-auto pb-2 hide-scrollbar">
+              <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
                 {stories.map((story, index) => (
-                  <div key={story.id} className="flex-shrink-0 flex flex-col items-center space-y-2">
+                  <div 
+                    key={story.id} 
+                    className="flex-shrink-0 flex flex-col items-center space-y-2 cursor-pointer hover:scale-105 transition-transform duration-300"
+                    onClick={() => setCurrentStoryIndex(index)}
+                  >
                     <div className={`relative w-16 h-16 rounded-full border-2 transition-all duration-500 ${
                       index === currentStoryIndex 
                         ? "border-gradient-to-r from-pink-500 via-purple-500 to-orange-400 animate-pulse" 
-                        : "border-gray-200"
+                        : "border-gray-200 hover:border-gray-300"
                     }`}>
                       <img 
                         src={story.avatar} 
@@ -166,16 +187,16 @@ const App = () => {
 
             {/* Posts Feed */}
             {posts.map((post) => (
-              <div key={post.id} className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300">
+              <div key={post.id} className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
                 {/* Post Header */}
                 <div className="flex items-center p-4 border-b border-gray-100">
                   <img 
                     src={post.user.avatar} 
                     alt={post.user.username}
-                    className="w-10 h-10 rounded-full mr-3"
+                    className="w-10 h-10 rounded-full mr-3 cursor-pointer hover:scale-110 transition-transform duration-300"
                   />
-                  <span className="font-semibold text-gray-800">{post.user.username}</span>
-                  <div className="ml-auto">
+                  <span className="font-semibold text-gray-800 cursor-pointer hover:text-purple-600 transition-colors duration-300">{post.user.username}</span>
+                  <div className="ml-auto cursor-pointer hover:text-gray-500 transition-colors duration-300">
                     <svg className="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
                     </svg>
@@ -183,11 +204,11 @@ const App = () => {
                 </div>
 
                 {/* Post Media */}
-                <div className="w-full">
+                <div className="w-full cursor-pointer">
                   <img 
                     src={post.media} 
                     alt="Post content"
-                    className="w-full object-cover"
+                    className="w-full object-cover hover:opacity-95 transition-opacity duration-300"
                   />
                 </div>
 
@@ -202,7 +223,7 @@ const App = () => {
                         <svg 
                           className={`w-6 h-6 transition-all duration-300 ${
                             likedPosts[post.id] 
-                              ? "fill-pink-500 text-pink-500 scale-110 animate-pulse" 
+                              ? "fill-pink-500 text-pink-500 scale-110 animate-bounce" 
                               : "text-gray-600 group-hover:text-pink-500"
                           }`} 
                           fill={likedPosts[post.id] ? "currentColor" : "none"} 
@@ -211,10 +232,10 @@ const App = () => {
                         >
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
-                        <span className="font-medium text-gray-700">{post.likes}</span>
+                        <span className="font-medium text-gray-700">{likedPosts[post.id] ? post.likes + 1 : post.likes}</span>
                       </button>
                       
-                      <button className="flex items-center space-x-1 group">
+                      <button className="flex items-center space-x-1 group cursor-pointer">
                         <svg className="w-6 h-6 text-gray-600 group-hover:text-blue-500 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
@@ -222,7 +243,7 @@ const App = () => {
                       </button>
                     </div>
                     
-                    <button className="group">
+                    <button className="group cursor-pointer">
                       <svg className="w-6 h-6 text-gray-600 group-hover:text-purple-500 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                       </svg>
@@ -232,13 +253,13 @@ const App = () => {
                   {/* Caption */}
                   <div className="mb-3">
                     <p className="text-gray-800">
-                      <span className="font-semibold mr-2">{post.user.username}</span>
+                      <span className="font-semibold mr-2 cursor-pointer hover:text-purple-600 transition-colors duration-300">{post.user.username}</span>
                       {post.caption}
                     </p>
                   </div>
                   
                   {/* View all comments */}
-                  <button className="text-gray-500 text-sm font-medium hover:text-gray-700 transition-colors duration-300">
+                  <button className="text-gray-500 text-sm font-medium hover:text-gray-700 transition-colors duration-300 cursor-pointer">
                     View all {post.comments} comments
                   </button>
                 </div>
@@ -258,14 +279,14 @@ const App = () => {
                       <img 
                         src={account.avatar} 
                         alt={account.username}
-                        className="w-8 h-8 rounded-full"
+                        className="w-8 h-8 rounded-full cursor-pointer hover:scale-110 transition-transform duration-300"
                       />
                       <div>
-                        <p className="font-medium text-gray-800 text-sm">{account.username}</p>
+                        <p className="font-medium text-gray-800 text-sm cursor-pointer hover:text-purple-600 transition-colors duration-300">{account.username}</p>
                         <p className="text-gray-500 text-xs">{account.followers} followers</p>
                       </div>
                     </div>
-                    <button className="text-blue-500 text-sm font-semibold hover:text-blue-600 transition-colors duration-300">
+                    <button className="px-3 py-1 bg-blue-500 text-white text-sm font-semibold rounded-full hover:bg-blue-600 transition-colors duration-300">
                       Follow
                     </button>
                   </div>
@@ -280,7 +301,7 @@ const App = () => {
                 {trendingHashtags.map((hashtag, index) => (
                   <span 
                     key={index} 
-                    className="px-3 py-1 bg-gradient-to-r from-pink-100 to-purple-100 text-purple-700 rounded-full text-sm font-medium hover:from-pink-200 hover:to-purple-200 transition-all duration-300 cursor-pointer"
+                    className="px-3 py-1 bg-gradient-to-r from-pink-100 to-purple-100 text-purple-700 rounded-full text-sm font-medium hover:from-pink-200 hover:to-purple-200 transition-all duration-300 cursor-pointer hover:shadow-sm"
                   >
                     {hashtag}
                   </span>
@@ -293,7 +314,7 @@ const App = () => {
               <h3 className="font-bold text-gray-800 mb-4">Online Friends</h3>
               <div className="flex space-x-3">
                 {onlineFriends.map((friend, index) => (
-                  <div key={index} className="flex flex-col items-center">
+                  <div key={index} className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform duration-300">
                     <div className="relative">
                       <img 
                         src={friend.avatar} 
@@ -311,18 +332,26 @@ const App = () => {
         </div>
       </div>
 
-      <style jsx>{`
-        .hide-scrollbar::-webkit-scrollbar {
+      <style jsx global>{`
+        .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
-        .hide-scrollbar {
+        .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
         .border-gradient-to-r {
-          background-image: linear-gradient(to right, #ec4899, #8b5cf6, #f97316);
-          background-origin: border-box;
-          background-clip: content-box, border-box;
+          background: linear-gradient(to right, #ec4899, #8b5cf6, #f97316);
+          border: 2px solid transparent;
+          background-clip: padding-box, border-box;
+          background-origin: padding-box, border-box;
+        }
+        @keyframes bounce {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.2); }
+        }
+        .animate-bounce {
+          animation: bounce 0.5s ease-in-out;
         }
       `}</style>
     </div>
